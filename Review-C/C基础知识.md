@@ -119,4 +119,34 @@ int main() {
     return 0;
 }
 ```
-##4.函数
+##5.循环
+* while
+```c
+int i,sum=0;
+    i=1;
+    while(  i<=100   )  //循环条件应该是什么呢？
+    {
+        sum=sum+i;
+        i++;         //这里是不是应该改变循环变量的值
+    }
+    printf("100以内所有整数之和为：%d\n", sum);
+```
+* do-while(使用do-while结构语句时，while括号后必须有分号。)
+```c
+    int number=200;
+    int year=2014;
+    do{
+      year++;     
+      number = number * 1.2;                  
+    }while(number<1000);     //这里好像缺点什么
+    printf("到%d年招工规模突破1000人\n", year);
+```
+##6.结束语句
+* break 
+
+    跳出当前循环
+* continue
+
+    结束本次循环开始执行下一次循环
+
+##7.函数
