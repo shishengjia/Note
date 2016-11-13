@@ -173,19 +173,19 @@ int i,sum=0;
 ```c
     enum Color{RED,YELLO,BLACK};
 ```
-    三种颜色的值分别0,1,2
+三种颜色的值分别0,1,2
 
 * 枚举可以指定值：
 ```c
     enum Color{RED=1,YELLOW,BLACK=5};
 ```
-    则YELLO的值依然是前面一个值+1，即2
+则YELLO的值依然是前面一个值+1，即2
 
 * 套路：自动计数的枚举
 ```c
     enum Color{RED,YELLO,BLACK,NUMCOLORS};
 ```
-    列出的值后面再加一个如NUMCOLORS，他就可以表示前面有多少个定义值，方便遍历
+列出的值后面再加一个如NUMCOLORS，他就可以表示前面有多少个定义值，方便遍历
 
 typedef
 ------------
