@@ -149,4 +149,152 @@ int i,sum=0;
 
     结束本次循环开始执行下一次循环
 
-##7.函数
+##7.枚举
+* 常规枚举
+```c
+    enum Color{RED,YELLO,BLACK};
+```
+    三种颜色的值分别0,1,2
+
+* 枚举可以指定值：
+```c
+    enum Color{RED=1,YELLOW,BLACK=5};
+```
+    则YELLO的值依然是前面一个值+1，即2
+
+* 套路：自动计数的枚举
+```c
+    enum Color{RED,YELLO,BLACK,NUMCOLORS};
+```
+    列出的值后面再加一个如NUMCOLORS，他就可以表示前面有多少个定义值，方便遍历
+
+##8.typedef
+
+C语言提供typedef来声明一个已有的数据类型的新名字。例如:
+```c
+    typedef int Length;
+```
+使得**Length**成为**int**类型的别名，这样**Length**就可以代替**int**出现在变量定义
+和参数声明的地方
+
+示例代码
+```c
+#include <stdio.h>
+
+typedef struct mStudent
+{
+int ID;
+char name[10];
+char gender[10];
+}student;//定义该结构体的别名为student
+
+student* getStu(student*);
+void printStu(student*);
+void printStu(student);
+
+int main()
+{
+//student代替 struct mStudent
+student stu = {1,"David","male"};
+printStu(&stu);
+student *p = &stu;
+printStu(p);
+
+student stu_1;
+student *q = &stu_1;
+getStu(q);
+printStu(q);
+return 0;
+}
+
+student* getStu(student*p){
+scanf("%d",&p->ID);
+scanf("%s",&p->name);
+scanf("%s",&p->gender);
+return p;
+}
+
+void printStu(student*p){
+printf("ID=%d,name=%s,gender=%s\n",p->ID,p->name,p->gender);
+}
+
+void printStu_2(student p){
+printf("ID=%d,name=%s,gender=%s\n",p.ID,p.name,p.gender);
+}
+```
+
+##9.指针
+先来看一个最经典的例子
+```c
+#include <stdio.h>
+void swap(int a,int b){
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+int main(){
+    int a = 2;
+    int b = 3;
+    swap(a,b);
+    printf("a=%d b=%d",a,b); 
+    return 0;
+}
+```
+结果为a=2 b=3，并没有发生交换，这是因为在执行swap函数时，传入的仅仅是a和b的值，把他们赋给swap函数中的形参a，b，在swap中的a，b和main中a，b可以看做局部变量，相互不影响，所以swap中a，b虽然交换了值，但是main中的a，b并不受影响
+
+做一下修改
+```c
+#include <stdio.h>
+void swap(int *a,int *b){
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int main(){
+    int a = 2;
+    int b = 3;
+    swap(&a,&b);
+    printf("a=%d b=%d",a,b);
+    return 0;
+}
+```
+这时a和b的值就交换过来了，a=3 b=2，因为通过"&"取地址符将a，b在内存中的地址传入到swap函数中，然后在swap函数中通过地址直接操作a，b所对应的值，这时a，b的值就能交换过来了
+
+指针保存的是内存地址，其实就是保存地址的变量。数组名其实也是一个地址，所以可以通过指针变量保存该数组的地址，并通过指针来访问数组元素。例如：
+```c
+int main() {
+    int arr[5] = {1, 2, 3, 4, 5};//声明一个数组
+    int *p = arr;//将该数组的地址arr赋给指针变量p
+    for (int i = 0; i < 5; i++) {
+//      printf("%d ,"arr[i]);//常规方式
+//      printf("%d ",*(arr+i));//数组名也是地址，所以也可以这样访问数组元素
+//      printf("%d ",*(p+i));//当然，这跟通过数组名来访问数组元素是一个道理
+        printf("%d ", p[i]);//这样也是可以的
+    }
+    return 0;
+}
+```
+在上面a[i]，*(p+i)处，指针p的值是使终没有改变。所以变量指针pa与数组名a可以互换。
+
+数组名和指针的区别在于数组名是常量指针，它的值是不能被修改的。看如下代码
+```c
+    int i,*pa,arr[]={3,4,5,6,7,3,7,4,4,6};
+    pa =arr;
+    for (i=0;i<=9;i++)
+    {
+      printf ( “%d”, *pa );
+      pa++ ;　 //注意这里，指针值被修改
+      //arr++是不被允许的，数组名是常量指针，不能被修改
+    } 
+```
+但是当把pa定义为常量指针(int *const pa),同样pa++也是不允许的。
+
+当然int *const pa说明pa是常量指针，不能被修改，但是*pa是变量，是可以修改的。如果是这样int const *pa，这样的话表示pa是指针变量，是能够被
+赋予新的地址的，但是*pa表示的值则是一个常量，不能被修改。
+
+
+
+
+
