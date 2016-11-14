@@ -143,10 +143,10 @@ int main() {
 ```c
 int i,sum=0;
     i=1;
-    while(  i<=100   )  //循环条件应该是什么呢？
+    while(  i<=100   )  
     {
         sum=sum+i;
-        i++;         //这里是不是应该改变循环变量的值
+        i++;         
     }
     printf("100以内所有整数之和为：%d\n", sum);
 ```
@@ -157,7 +157,7 @@ int i,sum=0;
     do{
       year++;     
       number = number * 1.2;                  
-    }while(number<1000);     //这里好像缺点什么
+    }while(number<1000);     
     printf("到%d年招工规模突破1000人\n", year);
 ```
 结束语句
