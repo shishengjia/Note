@@ -313,6 +313,14 @@ s.add([5,6]) # 报错 不能放入一个list，注意跟上面的区别
 s1 = set((1,2,3)) # 不报错
 s2 = set((1,[2,3])) # 报错 因为(1,[2,3])是一个"可变"的tuple,具体原因在tuple部分
 ```
+总结:<br>
+ * tuple可作为插入到dict，作为key指定value
+ * list不可插入到dict
+ * tuple可插入到set，作为key
+ * list不可插入到set
+ * 含list的tuple不可插入到set
+ * 含list的tuple不可插入到dict
+
 
 str是不变对象，而list是可变对象
 对于可变对象，比如list，对list进行操作，list内部的内容是会变化的，比如
