@@ -163,7 +163,7 @@ print(number[1]) #访问456元素
 ```python
 L = []
 ```
-**tuple**
+**tuple**<br>
 另一种有序列表:元组。tuple和list非常类似，但是tuple一旦初始化就不能修改，没有append()，insert()这样的方法。其他获取元素的方法和list是一样的，比如classmates[0]，classmates[-1]，但不能赋值成另外的元素。
 ```python
 classmates = ('Michael', 'Bob', 'Tracy') #注意tuple用的是圆括号
