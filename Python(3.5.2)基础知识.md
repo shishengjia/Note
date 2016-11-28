@@ -6,7 +6,8 @@
  * [输入输出](#输入输出)
  * [数据类型和变量](#数据类型和变量)
  * [list和tuple](#list和tuple)
-
+ * [循环](#循环)
+ * [dict和set](#dict和set)
 
 缩进和注释
 ----------
@@ -189,3 +190,144 @@ print(t)
 # (1, 2, ['change', 4])
 ```
 表面上看，tuple的元素确实变了，但其实变的不是tuple的元素，而是list的元素。tuple一开始指向的list并没有改成别的list，所以，tuple所谓的“不变”是说，tuple的每个元素，**指向**永远不变。即指向'a'，就不能改成指向'b'，指向一个list，就不能改成指向其他对象，但指向的这个list本身是可变的！
+
+条件判断
+---------
+根据Python的缩进规则，如果if语句判断是True，就把缩进的print语句执行了，否则，什么也不做。
+```python
+grade = input('Please enter your grade:\n')
+grade_int = int(grade)
+if grade_int > 60:  #不要忘了冒号结尾
+    print('pass')
+elif grade_int == 60:
+    print('wait')
+else:
+    print('failed')
+```
+
+循环
+----------
+**for in 循环**<br>
+实质上就是把每个Games的元素带入games，然后再由`print()`语句
+```pythion
+Games = ['LOL','WOW','OverWatch']
+for games in Games:
+    print(games)
+```
+Python提供一个`range()`函数，可以生成一个整数序列，再通过`list()`函数可以转换为`list`
+```python
+print(range(10))
+# range(0, 10)
+print(list(range(10)))
+# [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+```python
+sum = 0
+for x in range(101): 
+    sum += x
+print(sum)
+```
+**whiel循环**<br>
+```python
+#计算100以内所有奇数之和
+sum = 0
+n = 99
+while n > 0:
+    sum = sum + n
+    n = n - 2
+print(sum)
+```
+**break**<br>
+`break`语句可以提前退出循环
+```python
+for x in range(10):
+    if(x>5):
+        break
+    print(x)
+```
+**continue**<br>
+`continue`可以提前结束本轮循环，并直接开始下一轮循环
+```python
+#打印偶数
+for x in range(10):
+    if x%2 !=0:
+        continue
+    print(x)
+```
+dict和set
+-----------
+**dict**<br>
+dict全称dictionary，在其他语言中也称为map，使用键-值（key-value）存储，具有极快的查找速度，一个key只能对应一个value。<br>
+dict内部存放的顺序和key放入的顺序是没有关系的<br>
+```python
+GamesInfo = {'OverWatch':198,'GTA5':198} #注意是大括号
+print(GamesInfo['OverWatch'])
+# 198
+GamesInfo['OverWatch'] = 328 #修改key对应的value
+print(GamesInfo['OverWatch'])
+# 328
+print(GamesInfo['Over']) #key不存在就会报错
+# dict提供的get方法判断key是否存在
+print(GamesInfo.get('OverWatch',-1)) #key存在，就返回对应value
+print(GamesInfo.get('Over',-1)) #key不存在,就返回指定的-1
+```
+要删除一个key，用pop(key)方法，对应的value也会从dict中删除
+```python
+GamesInfo = {'OverWatch':198,'GTA5':198}
+print(GamesInfo)
+# {'GTA5': 198, 'OverWatch': 198}
+GamesInfo.pop('GTA5')
+print(GamesInfo)
+# {'OverWatch': 198}
+```
+另外，在Python中，字符串、整数等都是不可变的，因此，可以放心地作为key。而list是可变的，就不能作为key：
+这是因为dict根据key来计算value的存储位置，如果每次计算相同的key得出的结果不同，那dict内部就完全混乱了。这个通过key计算位置的算法称为哈希算法（Hash）。<br>
+**set**<br>
+set和dict类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在set中，没有重复的key。
+```python
+s = set([1,2,3]) # 要创建一个set，需要提供一个list作为输入集合
+print(s) # {1, 2, 3}
+s.add(4) # 添加一个元素
+print(s) # {1, 2, 3, 4}
+s.add(4) # 重复添加会被过滤
+print(s) # {1, 2, 3, 4}
+s.remove(1) # 移除一个元素
+print(s) # {2, 3, 4}
+```
+set可以看成数学意义上的无序和无重复元素的集合，因此，两个set可以做数学意义上的交集、并集等操作
+```python
+s1 = set([1,2,3])
+s2 = set([2,3,4])
+print(s1 & s2) # 交集 {2, 3}
+print(s1 | s2) # 并集 {1, 2, 3, 4}
+```
+
+set和dict的唯一区别仅在于没有存储对应的value，但是，set的原理和dict一样，所以，同样不可以放入可变对象，因为无法判断两个可变对象是否相等，也就无法保证set内部“不会有重复元素”。试试把list放入set，看看是否会报错。
+```python
+s = set([1,2,3]) # 这里的list只是作为输入集合
+s.add(4) # 不报错
+s.add([5,6]) # 报错 不能放入一个list，注意跟上面的区别
+```
+```python
+s1 = set((1,2,3)) # 不报错
+s2 = set((1,[2,3])) # 报错 因为(1,[2,3])是一个"可变"的tuple,具体原因在tuple部分
+```
+
+str是不变对象，而list是可变对象
+对于可变对象，比如list，对list进行操作，list内部的内容是会变化的，比如
+```python
+a = ['c', 'b', 'a']
+a.sort()
+print(a)
+# ['a', 'b', 'c']
+```
+对于不可变对象，比如str
+```python
+a = 'abc'
+b = a.replace('a', 'A')
+print(a) # abc
+print(b) # Abc
+```
+当我们调用`a.replace('a', 'A')`时，实际上调用方法`replace`是作用在字符串对象`'abc'`上的，而这个方法虽然名字叫`replace`，但却没有改变字符串`'abc'`的内容。相反，`replace`方法创建了一个新字符串`'Abc'`并返回，如果我们用变量b指向该新字符串，就容易理解了，变量a仍指向原有的字符串`'abc'`，但变量b却指向新字符串`'Abc'了`<br>
+对于不变对象来说，调用对象自身的任意方法，也不会改变该对象自身的内容。相反，这些方法会创建新的对象并返回，这样，就保证了不可变对象本身永远是不可变的。
