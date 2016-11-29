@@ -32,6 +32,10 @@ print('The quick brown fox', 'jumps over', 'the lazy dog')
 ```python
 print('100 + 200 =', 100 + 200)
 #100 + 200 = 300
+print(10/2) #两个整数相除，结果是浮点数 5.0
+print(2**3) #2的3次方 8
+print(10 // 3) # 取整 3
+print(10 % 3) # 取余 1
 ```
 `input()`可以让用户输入字符串，并存放到一个变量里，另外里面添加字符串则会变为提示信息显示出来
 ```python
