@@ -502,25 +502,205 @@ def f(a,b,*c):
 f(*(1,2)) # 1 2 ()
 f(*(1,2,3)) # 1 2 (3,)
 ```
+
+**递归函数**<br>
+递归函数的优点是定义简单，逻辑清晰。<br>
+使用递归函数需要注意防止栈溢出。在计算机中，函数调用是通过栈（stack）这种数据结构实现的，每当进入一个函数调用，栈就会加一层栈帧，每当函数返回，栈就会减一层栈帧。由于栈的大小不是无限的，所以，递归调用的次数过多，会导致栈溢出。如fact(1000)
+```python
+def fact(n):
+    if n == 1:
+        return 1
+    else:
+        return n*fact(n-1)
+print(fact(5))
+print(fact(1000)) # 递归调用次数过多，发生栈溢出
+# 看一下fact(5)的递归过程，注意栈的特性，先进后出
+===> fact(5)
+===> 5 * fact(4)
+===> 5 * (4 * fact(3))
+===> 5 * (4 * (3 * fact(2)))
+===> 5 * (4 * (3 * (2 * fact(1))))
+===> 5 * (4 * (3 * (2 * 1)))
+===> 5 * (4 * (3 * 2))
+===> 5 * (4 * 6)
+===> 5 * 24
+===> 120
+```
+解决递归调用栈溢出的方法是通过尾递归优化，事实上尾递归和循环的效果是一样的，把循环看成是一种特殊的尾递归函数也是可以的。<br>
+尾递归是指，在函数返回的时候，调用自身本身，并且，return语句不能包含表达式。这样，编译器或者解释器就可以把尾递归做优化，使递归本身无论调用多少次，都只占用一个栈帧，不会出现栈溢出的情况。<br>
+上面的fact(n)函数由于return n * fact(n - 1)引入了乘法表达式，所以就不是尾递归了。下面改成尾递归
+```python
+def fact(n):
+    return fact_iter(n, 1)
+
+def fact_iter(num, product):
+    if num == 1:
+        return product
+    return fact_iter(num - 1, num * product)
+# 看一下递归过程fact_iter(5,1)
+===> fact_iter(5, 1)
+===> fact_iter(4, 5)
+===> fact_iter(3, 20)
+===> fact_iter(2, 60)
+===> fact_iter(1, 120)
+===> 120
+```
+`return fact_iter(num - 1, num * product)`仅返回递归函数本身，`num - 1`和`num * product`在函数调用前就会被计算，不影响函数调用。<br>
+但是，大多数编程语言没有针对尾递归做优化，Python解释器也没有做优化，所以，即使把上面的fact(n)函数改成尾递归方式，也会导致栈溢出。<br>
 **总结**<br>
-Python的函数具有非常灵活的参数形态，既可以实现简单的调用，又可以传入非常复杂的参数。
+Python的函数具有非常灵活的参数形态，既可以实现简单的调用，又可以传入非常复杂的参数。<br>
+默认参数一定要用不可变对象，如果是可变对象，程序运行时会有逻辑错误！<br>
+要注意定义可变参数和关键字参数的语法：<br>
+*args是可变参数，args接收的是一个tuple；<br>
+**kw是关键字参数，kw接收的是一个dict。<br>
+以及调用函数时如何传入可变参数和关键字参数的语法：<br>
+可变参数既可以直接传入：`func(1, 2, 3)`，又可以先组装`list`或`tuple`，再通过`*args`传入：`func(*(1, 2, 3))`；<br>
+关键字参数既可以直接传入：`func(a=1, b=2)`，又可以先组装`dict`，再通过`**kw`传入：`func(**{'a': 1, 'b': 2})`。<br>
+使用`*args`和`**kw`是Python的习惯写法，当然也可以用其他参数名，但最好使用习惯用法。<br>
+命名的关键字参数是为了限制调用者可以传入的参数名，同时可以提供默认值。<br>
+定义命名的关键字参数在没有可变参数的情况下不要忘了写分隔符`*`，否则定义的将是位置参数。<br>
 
-默认参数一定要用不可变对象，如果是可变对象，程序运行时会有逻辑错误！
+高级特性
+--------------
+**切片**<br>
+对于一个list，list[参数m:参数n:参数k]<br>
+    * 参数m表示开始索引从m开始（包括索引m），默认是0
+    * 参数n表示切片直到索引n为止（不包括索引n），默认是list长度
+    * 参数k表示每k个元素取一个，默认是1
+```python
+L = list(range(11))
+print(L[0:5]) # [0, 1, 2, 3, 4]
+print(L[::2]) # [0, 2, 4, 6, 8, 10]
+print(L[1:3]) # [1, 2]
+print(L[-2:]) # [9, 10] ,从倒数第二个元素开始直到末尾
+print(L[-2:-1]) # [9] ，从倒数第二个元素开始到倒数第一个元素（不包括）
+print(L[:]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+```
+对于字符串和tuple，切片的操作相同。<br>
 
-要注意定义可变参数和关键字参数的语法：
+**迭代**<br>
+Python的for循环抽象程度要高于Java的for循环，因为Python的for循环不仅可以用在list或tuple上，还可以作用在其他**可迭代对象上**。
+list这种数据类型虽然有下标，但很多其他数据类型是没有下标的，但是，只要是可迭代对象，无论有无下标，都可以迭代，比如dict就可以迭代
+```python
+# dict的存储不是按照list的方式顺序排列，迭代出的结果顺序是乱的
+d = {'a':1,'b':2,'c':3}
+for key in d:    # 只迭代key
+    print(key)
+for values in d.values(): # 只迭代values
+    print(values)
+for key,value in d.items(): # 同时迭代key和对应的value
+    print(key,'-',value)
+```
+字符串也是可迭代对象，因此，也可以作用于for循环
+```python
+str = 'hello python'
+for c in str:
+    print(c)
+```
+判断是否可以迭代，通过`collections`模块的`Iterable`类型判断
+```python
+from collections import Iterable
+print(isinstance('abc', Iterable)) #True
+print(isinstance(123, Iterable)) #False
+print(isinstance({'a':1,'b':2}, Iterable)) #True
+```
+如果要对list实现类似Java那样的下标循环,Python内置的`enumerate`函数可以把一个list变成索引-元素对，这样就可以在for循环中同时迭代索引和元素本身：
+```python
+str = 'abc'
+for i,value in enumerate(str):
+    print(i,value)
+# 0 a
+# 1 b
+# 2 c
+```
+**列表生成式**<br>
+写列表生成式时，把要生成的元素比如`x * x`放到前面，后面跟`for`循环
+```python
+print([x*x for x in range(1,11)]) # [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+print([x*x for x in range(1,11) if x%2 ==0]) # 还可以加判断语句，[4, 16, 36, 64, 100]
+print([m + n for m in 'ABC' for n in 'XYZ']) # 两层for循环 ['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
+```
+列表生成式也可以使用两个变量来生成list
+```python
+d = {'a':1,'b':2,'c':3}
+print([k+'-'+str(v) for k,v in d.items()]) # 注意这里的v是int类型，要转换成字符串类型
+```
+练习
+```python
+L1 = ['Hello', 'World', 18, 'Apple', None]
+print([s.lower() for s in L1 if isinstance(s,str)]) #把list不是字符串类型的排除掉，其余的都转为小写
+```
+**生成器**<br>
+要创建一个generator，有很多种方法。第一种方法很简单，只要把一个列表生成式的[]改成()，就创建了一个generator
+```python
+g = (x * x for x in range(10)) #generator也是可迭代对象：
+for n in g:
+    print(n)
+```
+定义generator的另一种方法。如果一个函数定义中包含yield关键字，那么这个函数就不再是一个普通函数，而是一个generator。<br>
+函数是顺序执行，遇到return语句或者最后一行函数语句就返回。而变成generator的函数，在每次调用next()的时候执行，遇到yield语句返回，再次执行时从上次返回的yield语句处继续执行。
+```python
+# 杨辉三角
+def triangles():
+    L = [1]
+    while True:
+        yield L
+        temp = L[:]
+        temp.insert(0,0)
+        for i in range(len(L)):
+            L[i] = temp[i] + temp[i+1]
+        L.append(1)
+n = 0
+for t in triangles():
+    print(t)
+    n = n + 1
+    if n == 10:
+        break
+```
 
-*args是可变参数，args接收的是一个tuple；
-
-**kw是关键字参数，kw接收的是一个dict。
-
-以及调用函数时如何传入可变参数和关键字参数的语法：
-
-可变参数既可以直接传入：`func(1, 2, 3)`，又可以先组装`list`或`tuple`，再通过`*args`传入：`func(*(1, 2, 3))`；
-
-关键字参数既可以直接传入：`func(a=1, b=2)`，又可以先组装`dict`，再通过`**kw`传入：`func(**{'a': 1, 'b': 2})`。
-
-使用`*args`和`**kw`是Python的习惯写法，当然也可以用其他参数名，但最好使用习惯用法。
-
-命名的关键字参数是为了限制调用者可以传入的参数名，同时可以提供默认值。
-
-定义命名的关键字参数在没有可变参数的情况下不要忘了写分隔符`*`，否则定义的将是位置参数。
+**迭代器**<br>
+可以直接作用于for循环的数据类型有以下几种：<br>
+一类是集合数据类型，如list、tuple、dict、set、str等；<br>
+一类是generator，包括生成器和带yield的generator function。<br>
+这些可以直接作用于for循环的对象统称为**可迭代对象**：Iterable。<br>
+可以使用isinstance()判断一个对象是否是Iterable对象：<br>
+```python
+>>> from collections import Iterable
+>>> isinstance([], Iterable)
+True
+>>> isinstance({}, Iterable)
+True
+>>> isinstance('abc', Iterable)
+True
+>>> isinstance((x for x in range(10)), Iterable)
+True
+>>> isinstance(100, Iterable)
+False
+```
+生成器不但可以作用于for循环，还可以被next()函数不断调用并返回下一个值，直到最后抛出StopIteration错误表示无法继续返回下一个值了。<br>
+可以被next()函数调用并不断返回下一个值的对象称为迭代器：Iterator。<br>
+可以使用isinstance()判断一个对象是否是Iterator对象
+```python
+>>> from collections import Iterator
+>>> isinstance((x for x in range(10)), Iterator)
+True
+>>> isinstance([], Iterator)
+False
+>>> isinstance({}, Iterator)
+False
+>>> isinstance('abc', Iterator)
+False
+```
+生成器都是Iterator对象，但list、dict、str虽然是Iterable，却不是Iterator。<br>
+把list、dict、str等Iterable变成Iterator可以使用iter()函数：
+```python
+>>> isinstance(iter([]), Iterator)
+True
+>>> isinstance(iter('abc'), Iterator)
+True
+```
+Python的Iterator对象表示的是一个数据流，Iterator对象可以被next()函数调用并不断返回下一个数据，直到没有数据时抛出StopIteration错误。可以把这个数据流看做是一个有序序列，但我们却不能提前知道序列的长度，只能不断通过next()函数实现按需计算下一个数据，所以Iterator的计算是惰性的，只有在需要返回下一个数据时它才会计算。<br>
+小结<br>
+ * 凡是可作用于for循环的对象都是Iterable类型；
+ * 凡是可作用于next()函数的对象都是Iterator类型，它们表示一个惰性计算的序列；
+ * 集合数据类型如list、dict、str等是Iterable但不是Iterator，不过可以通过iter()函数获得一个Iterator对象。<br>
