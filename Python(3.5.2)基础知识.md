@@ -9,6 +9,7 @@
  * [dict和set](#dict和set)
  * [函数](#函数)
  * [高级特性](#高级特性)
+ * [函数式编程](#函数式编程)
  
 缩进和注释
 ----------
@@ -706,3 +707,98 @@ Python的Iterator对象表示的是一个数据流，Iterator对象可以被next
  * 凡是可作用于for循环的对象都是Iterable类型；
  * 凡是可作用于next()函数的对象都是Iterator类型，它们表示一个惰性计算的序列；
  * 集合数据类型如list、dict、str等是Iterable但不是Iterator，不过可以通过iter()函数获得一个Iterator对象。<br>
+ 
+函数式编程
+-----------
+ 函数式编程就是一种抽象程度很高的编程范式，**纯粹的函数式编程语言编写的函数没有变量**，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。允许使用变量的程序设计语言，由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。<br>
+ 函数式编程的一个特点就是，允许把函数本身作为参数传入另一个函数，还允许返回一个函数。<br>
+ Python对函数式编程提供部分支持。由于Python允许使用变量，因此，Python不是纯函数式编程语言。<br>
+**高阶函数(Higher-order function)**<br>
+```python
+f = abs 
+print(f(-10))
+```
+变量可以指向函数。<br>
+函数名其实就是指向函数的变量<br>
+对于`abs()`这个函数，完全可以把函数名`abs`看成变量，它指向一个可以计算绝对值的函数<br>
+所以，变量可以指向函数，函数的参数能接收变量，那么一个函数就可以接收另一个函数作为参数，这种函数就称之为高阶函数。
+```python
+def cal(a,b,f):
+    return f(a)+f(b)
+print(cal(-3,-2,abs)) # 将指向函数的变量abs传入
+```
+**map()/reduce()**<br>
+**map()**
+`map(`)函数接收两个参数，一个是`函数`，一个是`Iterable`，`map`将传入的函数依次作用到序列的每个元素，并把结果作为新的`Iterator`返回。
+```python
+def f(x):
+    return x*x
+r = map(f,list(range(1,10)))
+print(list(r)) # [1, 4, 9, 16, 25, 36, 49, 64, 81]
+print(list(map(str, [1, 2, 3]))) # ['1', '2', '3']
+```
+`map()`传入的第一个参数是`f`，即函数对象本身。由于结果`r`是一个`Iterator`，`Iterator`是惰性序列，因此通过`list()`函数让它把整个序列都计算出来并返回一个`list`。<br>
+**reduce()**<br>
+`reduce`把一个函数作用在一个序列`[x1, x2, x3, ...]`上，这个函数必须接收两个参数，`reduce`把结果继续和序列的下一个元素做累积计算
+```python
+from functools import reduce
+def f(x,y):
+    return x*10+y
+print(reduce(f,[1,2,3])) # 123
+```
+结合map和reduce
+```python
+from functools import reduce
+def f_1(x,y):
+    return x*10+y
+
+def f_2(s):
+    return {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}[s]
+print(reduce(f_1,map(f_2,['3','2','3']))) # 323
+```
+f_2返回s在dict中的索引值，即字符转数字，当然直接int()就可以，这里只是用map实现这个功能，仅用几行代码。<br>
+
+**filter()函数**<br>
+和map()类似，filter()也接收一个函数和一个序列。和map()不同的是，filter()把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素。
+```python
+# 保留奇数
+def is_odd(n):
+    return n % 2 == 1
+print(list(filter(is_odd, [1, 2, 4, 5, 6, 9, 10, 15])))
+```
+```python
+def palindrome(n):
+    return str(n)==str(n)[::-1]  # 判断是否是回文数，仅用一行代码！！！
+print(list(filter(palindrome,[12321,123,1441,454,1])))
+```
+
+**sorted()函数**<br>
+排序
+```python
+>>> sorted([36, 5, -12, 9, -21])
+[-21, -12, 5, 9, 36]
+```
+接收一个key函数来实现自定义的排序，例如按绝对值大小排序
+```python
+>>> sorted([36, 5, -12, 9, -21], key=abs) # key指定的函数将作用于list的每一个元素上，并根据key函数返回的结果进行排序
+[5, 9, -12, -21, 36]
+```
+默认情况下，对字符串排序，是按照ASCII的大小比较的，由于'Z' < 'a'，结果，大写字母Z会排在小写字母a的前面。
+```python
+>>> sorted(['bob', 'about', 'Zoo', 'Credit'])
+['Credit', 'Zoo', 'about', 'bob']
+>>> sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower) # 传入key函数，忽略大小写
+['about', 'bob', 'Credit', 'Zoo']
+>>> sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower, reverse=True)
+['Zoo', 'Credit', 'bob', 'about']  # 实现方向，传入第三个参数reverse=True
+```
+```python
+# 成绩从大到小排列
+L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+def by_name(t):
+   return t[1]
+print(sorted(L,key=by_name,reverse=True)) # [('Adam', 92), ('Lisa', 88), ('Bob', 75), ('Bart', 66)]
+```
+
+**返回函数**<br>
+[看大神的讲解](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/001431835236741e42daf5af6514f1a8917b8aaadff31bf000#0)
