@@ -802,3 +802,28 @@ print(sorted(L,key=by_name,reverse=True)) # [('Adam', 92), ('Lisa', 88), ('Bob',
 
 **返回函数**<br>
 [看大神的讲解](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/001431835236741e42daf5af6514f1a8917b8aaadff31bf000#0)
+
+**匿名函数**<br>
+在Python中，对匿名函数提供了有限支持。以map()函数为例
+```python
+>>> list(map(lambda x: x * x, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
+[1, 4, 9, 16, 25, 36, 49, 64, 81]
+```
+关键字lambda表示匿名函数，冒号前面的x表示函数参数<br>
+匿名函数有个限制，就是只能有一个表达式，不用写return，返回值就是该表达式的结果<br>
+因为函数没有名字，不必担心函数名冲突。此外，匿名函数也是一个函数对象，也可以把匿名函数赋值给一个变量，再利用变量来调用该函数：
+```python
+>>> f = lambda x: x * x
+>>> f
+<function <lambda> at 0x101c6ef28>
+>>> f(5)
+25
+```
+同样，也可以把匿名函数作为返回值返回，比如：
+```python
+def build(x, y):
+    return lambda: x * x + y * y
+```
+
+**装饰器**<br>
+
