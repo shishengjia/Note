@@ -9,8 +9,21 @@
  * [dict和set](#dict和set)
  * [函数](#函数)
  * [高级特性](#高级特性)
+    * [切片](#切片)
+    * [迭代](#迭代)
+    * [列表生成式](#列表生成式)
+    * [生成器](#生成器)
+    * [迭代器](#迭代器)
  * [函数式编程](#函数式编程)
- 
+    * [高阶函数](#高阶函数)
+    * [map和reduce](#map和reduce)
+    * [filter函数](#filter函数)
+    * [sorted函数](#sorted函数)
+    * [返回函数](#返回函数)
+    * [匿名函数](#匿名函数)
+    * [装饰器](#装饰器)
+    * [偏函数](#偏函数)
+    
 缩进和注释
 ----------
 按照约定俗成的管理，编写Python代码时应该始终坚持使用**4个空格**的缩进。<br>
@@ -564,7 +577,8 @@ Python的函数具有非常灵活的参数形态，既可以实现简单的调�
 
 高级特性
 --------------
-**切片**<br>
+切片
+--------------
 对于一个list，list[参数m:参数n:参数k]<br>
 
     * 参数m表示开始索引从m开始（包括索引m），默认是0
@@ -581,7 +595,8 @@ print(L[:]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ```
 对于字符串和tuple，切片的操作相同。<br>
 
-**迭代**<br>
+迭代
+---------
 Python的for循环抽象程度要高于Java的for循环，因为Python的for循环不仅可以用在list或tuple上，还可以作用在其他**可迭代对象上**。
 list这种数据类型虽然有下标，但很多其他数据类型是没有下标的，但是，只要是可迭代对象，无论有无下标，都可以迭代，比如dict就可以迭代
 ```python
@@ -616,7 +631,8 @@ for i,value in enumerate(str):
 # 1 b
 # 2 c
 ```
-**列表生成式**<br>
+列表生成式
+------------
 写列表生成式时，把要生成的元素比如`x * x`放到前面，后面跟`for`循环
 ```python
 print([x*x for x in range(1,11)]) # [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
@@ -633,7 +649,8 @@ print([k+'-'+str(v) for k,v in d.items()]) # 注意这里的v是int类型，要�
 L1 = ['Hello', 'World', 18, 'Apple', None]
 print([s.lower() for s in L1 if isinstance(s,str)]) #把list不是字符串类型的排除掉，其余的都转为小写
 ```
-**生成器**<br>
+生成器
+--------
 要创建一个generator，有很多种方法。第一种方法很简单，只要把一个列表生成式的[]改成()，就创建了一个generator
 ```python
 g = (x * x for x in range(10)) #generator也是可迭代对象：
@@ -661,7 +678,8 @@ for t in triangles():
         break
 ```
 
-**迭代器**<br>
+迭代器
+--------
 可以直接作用于for循环的数据类型有以下几种：<br>
 一类是集合数据类型，如list、tuple、dict、set、str等；<br>
 一类是generator，包括生成器和带yield的generator function。<br>
@@ -713,7 +731,8 @@ Python的Iterator对象表示的是一个数据流，Iterator对象可以被next
  函数式编程就是一种抽象程度很高的编程范式，**纯粹的函数式编程语言编写的函数没有变量**，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。允许使用变量的程序设计语言，由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。<br>
  函数式编程的一个特点就是，允许把函数本身作为参数传入另一个函数，还允许返回一个函数。<br>
  Python对函数式编程提供部分支持。由于Python允许使用变量，因此，Python不是纯函数式编程语言。<br>
-**高阶函数(Higher-order function)**<br>
+高阶函数
+----------------------------------
 ```python
 f = abs 
 print(f(-10))
@@ -727,7 +746,8 @@ def cal(a,b,f):
     return f(a)+f(b)
 print(cal(-3,-2,abs)) # 将指向函数的变量abs传入
 ```
-**map()/reduce()**<br>
+map和reduce
+--------------
 **map()**
 `map(`)函数接收两个参数，一个是`函数`，一个是`Iterable`，`map`将传入的函数依次作用到序列的每个元素，并把结果作为新的`Iterator`返回。
 ```python
@@ -758,7 +778,8 @@ print(reduce(f_1,map(f_2,['3','2','3']))) # 323
 ```
 f_2返回s在dict中的索引值，即字符转数字，当然直接int()就可以，这里只是用map实现这个功能，仅用几行代码。<br>
 
-**filter()函数**<br>
+filter函数
+-----------------
 和map()类似，filter()也接收一个函数和一个序列。和map()不同的是，filter()把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素。
 ```python
 # 保留奇数
@@ -772,7 +793,8 @@ def palindrome(n):
 print(list(filter(palindrome,[12321,123,1441,454,1])))
 ```
 
-**sorted()函数**<br>
+sorted函数
+------------
 排序
 ```python
 >>> sorted([36, 5, -12, 9, -21])
@@ -800,10 +822,12 @@ def by_name(t):
 print(sorted(L,key=by_name,reverse=True)) # [('Adam', 92), ('Lisa', 88), ('Bob', 75), ('Bart', 66)]
 ```
 
-**返回函数**<br>
+返回函数
+----------
 [看大神的讲解](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/001431835236741e42daf5af6514f1a8917b8aaadff31bf000#0)
 
-**匿名函数**<br>
+匿名函数
+---------
 在Python中，对匿名函数提供了有限支持。以map()函数为例
 ```python
 >>> list(map(lambda x: x * x, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
@@ -825,5 +849,93 @@ def build(x, y):
     return lambda: x * x + y * y
 ```
 
-**装饰器**<br>
+装饰器
+--------
+要增强一个函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改该函数的定义，这种在代码运行期间动态增加功能的方式，称之为“装饰器”（Decorator）.<br>
+本质上，decorator就是一个返回函数的高阶函数,定义一个能打印日志的decorator<br>
+```python
+def log(func):
+    @functools.wraps(func) #把原始函数的__name__等属性复制到wrapper()函数中
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+```
+借助Python的@语法，把decorator置于函数的定义处：
+```python
+@lognw
+def now():
+    print('2016-12-20')
+    
+now()
+#call now():
+#2016-12-20
+```
+事实上,把`@log`放到`now()`函数的定义处，相当于执行了语句,`now`函数变量其实已经传到了`func`参数里
+```python
+now = log(now)
+```
+自定义log的文本
+```python
+def log(text):
+    def decorator(func):
+        @functools.wraps(func) #把原始函数的__name__等属性复制到wrapper()函数中
+        def wrapper(*args, **kw):
+            print('%s %s():' % (text, func.__name__))
+            return func(*args, **kw)
+        return wrapper
+    return decorator
 
+@log('execute')
+def now():
+    print('2016-12-20')
+```
+相当于执行了`now = log('execute')(now)`，首先执行log('execute')，返回的是decorator函数，再调用返回的函数，参数是now函数，返回值最终是wrapper函数。<br>
+
+综合例子
+```python
+from functools import wraps
+
+def log(str_or_func):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kw):
+            fname = func.__name__
+            print('%s call %s():' % (text, fname))
+            func(*args, **kw)
+            print('end call %s():' % fname)
+        return wrapper
+    if type(str_or_func) == str:
+        text = str_or_func
+        return decorator
+    else:
+        text = 'begin'
+        return decorator(str_or_func)  #这里其实str_or_func接收了函数变量，这个过程将str_or_func接收的函数变量传到func参数里
+@log
+def f():
+    print('abc')
+f()
+@log('execute')
+def g():
+    print('xyz')
+g()
+```
+
+偏函数
+---------
+functools.partial帮助我们创建一个偏函数，直接使用下面的代码创建一个新的函数
+```python
+#将二进制字符串转换为整数
+>>> import functools
+>>> int2 = functools.partial(int, base=2)
+>>> int2('1000000')
+64
+>>> int2('1010101')
+85
+```
+`functools.partial`的作用就是，把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数，调用这个新函数会更简单。<br>
+所以也可以在函数调用时传入其他值
+```python
+>>> int2('1000000', base=10)
+1000000
+```
