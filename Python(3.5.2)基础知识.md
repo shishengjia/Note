@@ -23,7 +23,9 @@
     * [匿名函数](#匿名函数)
     * [装饰器](#装饰器)
     * [偏函数](#偏函数)
-    
+ * [面向对象编程](#面向对象编程)
+  
+  
 缩进和注释
 ----------
 按照约定俗成的管理，编写Python代码时应该始终坚持使用**4个空格**的缩进。<br>
@@ -938,4 +940,166 @@ functools.partial帮助我们创建一个偏函数，直接使用下面的代码
 ```python
 >>> int2('1000000', base=10)
 1000000
+```
+
+面向对象编程
+------------
+**类和实例**<br>
+```python
+class Student(object):
+
+    def __init__(self,name,score):
+        self.name = name
+        self.score = score
+
+    def print(self):
+        print('Name: %s ,Score: %s' % (self.name,self.score))
+
+stu_1 = Student('shishengjia',80)
+stu_1.print()
+```
+object表示要继承的类，没有合适的继承类，就用object<br>
+和普通的函数相比，在类中定义的函数只有一点不同，就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。
+
+**访问限制**<br>
+```python
+class Student(object):
+
+    def __init__(self,name,score):
+        self.__name = name
+        self.__score = score
+
+    def print(self):
+        print('Name: %s ,Score: %s' % (self.__name,self.__score))
+
+    def setName(self,name):
+        self.__name = name
+
+    def getName(self):
+        return self.__name
+
+stu_1 = Student('shishengjia',80)
+stu_1.setName("ssj")
+print(stu_1.getName())
+```
+实例的变量名如果以`__`开头，就变成了一个私有变量<br>
+在Python中，变量名类似__xxx__的，也就是以双下划线开头，并且以双下划线结尾的，是特殊变量，特殊变量是可以直接访问的，不是private变量，所以，不能用`__name__`、`__score__`这样的变量名。<br>
+不能直接访问`__name`是因为Python解释器对外把`__name`变量改成了`_Student__name`，所以，仍然可以通过`_Student__name`来访问`__name`变量,但是强烈建议不要这么干，因为不同版本的Python解释器可能会把`__name`改成不同的变量名.
+
+
+**继承和多态**<br>
+```python
+
+class Animal(object):
+
+    def run(self):
+        print('Animal is running')
+
+    def run_2(self,animal):
+        animal.run()
+
+class Dog(Animal):
+
+    def run(self):
+       print('Dog is running')
+
+class Cat(Animal):
+
+    def run(self):
+       print('Cat is running')
+       
+class Human(object):
+
+    def run(self):
+       print('Human is running')
+
+animal = Animal()
+dog = Dog()
+cat = Cat();
+animal.run()
+dog.run()
+cat.run()
+animal.run_2(cat)
+animal.run_2(Human())
+```
+子类的`run()`覆盖了父类的`run()`，在代码运行的时候，总是会调用子类的`run()`<br>
+多态的好处就是，当我们需要传入`Dog、Cat、Tortoise……`时，我们只需要接收`Animal`类型就可以了，因为`Dog、Cat、Tortoise……`都是`Animal`类型，然后，按照`Animal`类型进行操作即可。由于`Animal`类型有`run()`方法，因此，传入的任意类型，只要是`Animal`类或者子类，就会自动调用实际类型的`run()`方法，这就是多态的意思：
+对于静态语言（例如Java）来说，如果需要传入Animal类型，则传入的对象必须是Animal类型或者它的子类，否则，将无法调用run()方法。<br>
+对于Python这样的动态语言来说，**则不一定需要传入Animal类型。我们只需要保证传入的对象有一个run()方法就可以了**<br>
+
+**获取对象信息**<br>
+
+**使用type**<br>
+```python
+import types
+
+def run():
+    pass
+
+print(type(123) == int)
+print(type('123') == str)
+print(type(run) == types.FunctionType) #判断是否为函数
+print(type(abs) == types.BuiltinFunctionType) #判断是否为内置函数
+print(type(lambda x: x) == types.LambdaType) #判断是否为lambda表达式
+```
+
+**使用isinstance()**<br>
+object -> Animal -> Dog -> Husky
+```python
+a = Animal()
+d = Dog()
+h = Husky()
+
+isinstance(h, Husky) #true
+isinstance(h, Dog) #true
+isinstance(d, Husky) #false
+```
+
+**使用dir()**<br>
+如果要获得一个对象的所有属性和方法，可以使用dir()函数，它返回一个包含字符串的list，比如，获得一个str对象的所有属性和方法<br>
+```python
+print(dir('abc'))
+```
+类似`__xxx__`的属性和方法在Python中都是有特殊用途的，比如`__len__`方法返回长度。在Python中，如果你调用`len()`函数试图获取一个对象的长度，实际上，在`len()`函数内部，它自动去调用该对象的`__len__()`方法，所以，下面的代码是等价的：
+```python
+>>> len('ABC')
+3
+>>> 'ABC'.__len__()
+3
+```
+[剩余的一些杂碎知识](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/001431866385235335917b66049448ab14a499afd5b24db000)
+
+**实例属性和类属性**<br>
+由于Python是动态语言，根据类创建的实例可以任意绑定属性。给实例绑定属性的方法是通过实例变量，或者通过self变量
+```python
+class Student(object):
+    def __init__(self, name):
+        self.name = name
+
+s = Student('Bob')
+s.score = 90
+```
+直接在class中定义属性，这种属性是类属性，归Student类所有
+```python
+class Student(object):
+    name = 'Student'
+```
+
+```python
+>>> class Student(object):
+...     name = 'Student'
+...
+>>> s = Student() # 创建实例s
+>>> print(s.name) # 打印name属性，因为实例并没有name属性，所以会继续查找class的name属性
+Student
+>>> print(Student.name) # 打印类的name属性
+Student
+>>> s.name = 'Michael' # 给实例绑定name属性
+>>> print(s.name) # 由于实例属性优先级比类属性高，因此，它会屏蔽掉类的name属性
+Michael
+>>> print(Student.name) # 但是类属性并未消失，用Student.name仍然可以访问
+Student
+>>> del s.name # 如果删除实例的name属性
+>>> print(s.name) # 再次调用s.name，由于实例的name属性没有找到，类的name属性就显示出来了
+Student
 ```
