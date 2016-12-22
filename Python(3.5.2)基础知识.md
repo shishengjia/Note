@@ -1103,3 +1103,60 @@ Student
 >>> print(s.name) # 再次调用s.name，由于实例的name属性没有找到，类的name属性就显示出来了
 Student
 ```
+
+面向对象高级编程
+------------------
+正常情况下，当我们定义了一个class，创建了一个class的实例后，我们可以给该实例绑定任何属性和方法，这就是动态语言的灵活性<br>
+但是，给一个实例绑定的方法，对另一个实例是不起作用的,为了给所有实例都绑定方法，可以给class绑定方法
+
+```python
+def set_Age(self,age):
+    self.age = age
+
+from types import MethodType
+class Student(object):
+    def __init__(self,name):
+        self.name = name
+
+stu_1 = Student('a')
+stu_2 = Student('b')
+
+Student.set_Age = MethodType(set_Age,Student) #给class绑定方法
+
+stu_1.set_Age(20)
+
+stu_2.set_Age(40)
+print(stu_1.age,'  ',stu_2.age,'   ',Student.age) # 40 40 40
+```
+但是要注意，给class绑定方法后，**方法内的属性是类属性，并不是实例属性**，所以当依次调用`stu_1`和`stu_2`的`set_Age`，修改的都是Student的类属性，即age，所以，最后的修改将会覆盖之前的修改，从输出也可以看出来，三者的age值是一样的，因为age是一个类属性。因此，动态绑定一个方法后，比如上面的代码，不能随便调用set_Age方法，因为调用此方法更改的是类属性age的值，不是实例a自身的age属性值。<br>
+下面是在构造类时就把属性添加进去，就不回出现上面的问题。
+```python
+class Student(object):
+    def __init__(self, ages):
+        self.ages = ages
+
+    def set_Age(self, ages):
+
+        self.ages = ages
+
+stu_1 = Student(20)
+stu_2 = Student(30)
+
+stu_1.set_Age(10)
+
+stu_2.set_Age(40)
+print(stu_1.ages, '  ', stu_2.ages) # 10 40
+```
+**使用__slots__限制实例属性**<br>
+```python
+class Student(object):
+    __slots__ = ('name', 'age') # 用tuple定义允许绑定的属性名称
+
+stu = Student()
+stu.age = 20;
+stu.name = 'shi'
+stu.gender = 'male' # 不允许，会报错，因为gender没有绑定到__slots__中
+```
+需要注意的是，`__slots__`定义的属性仅对当前类实例起作用，**对继承的子类是不起作用的**,除非在子类中也定义`__slots__`，这样，子类实例允许定义的属性就是**自身的`__slots__`加上父类的`__slots__`**。<br>
+
+**使用@property**<br>
