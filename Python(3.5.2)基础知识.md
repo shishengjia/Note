@@ -1160,3 +1160,28 @@ stu.gender = 'male' # 不允许，会报错，因为gender没有绑定到__slots
 需要注意的是，`__slots__`定义的属性仅对当前类实例起作用，**对继承的子类是不起作用的**,除非在子类中也定义`__slots__`，这样，子类实例允许定义的属性就是**自身的`__slots__`加上父类的`__slots__`**。<br>
 
 **使用@property**<br>
+Python内置的@property装饰器负责把一个方法变成属性调用
+```python
+
+class Student(object):
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self,score):
+        if not isinstance(score,int):
+            raise ValueError('score must be a integer')
+        if score<0 or score>100:
+            raise ValueError('score must between 0-100')
+        self._score = score
+
+    @property  #不设置setter，则为只读属性
+    def ID(self):
+        return 330282
+
+stu = Student()
+stu.score = 100
+print(stu.score,' ',stu.ID)
+```
+注意，使用`@property`时，属性前要加个`_`符号
