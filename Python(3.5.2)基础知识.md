@@ -1185,3 +1185,90 @@ stu.score = 100
 print(stu.score,' ',stu.ID)
 ```
 注意，使用`@property`时，属性前要加个`_`符号
+
+
+**多重继承**<br>
+```python
+
+class Animal(object):
+    def run(self):
+        print('Animal is running')
+
+class Barkable(object):
+    def Bark(self):
+        print('Barking...')
+
+class Flyable(object):
+    def Fly(self):
+        print('Flying...')
+
+class Dog(Animal,Barkable):
+    def run(self):
+        print('Dog is running')
+
+class Bird(Animal,Flyable):
+    def run(self):
+        print('Bird is running')
+
+dog = Dog()
+bird = Bird()
+dog.run()
+dog.Bark()
+bird.run()
+bird.Fly()
+```
+
+**定制类**<br>
+[定制类](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/0014319098638265527beb24f7840aa97de564ccc7f20f6000)
+
+**枚举类**<br>
+```python
+from enum import Enum,unique
+
+Month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+
+for name, member in Month.__members__.items():
+    print(name, '=>', member, ',', member.value)
+
+
+@unique
+class Days(Enum):
+    Sun = 0 # Sun的value被设定为0
+    Mon = 1
+    Tue = 2
+    Wed = 3
+    Thu = 4
+    Fri = 5
+    Sat = 6
+
+print(Days.Sun) #Days.Sun
+print(Days(0))
+print(Days['Sun'])
+#上面三者等价
+print(Days.Sun.name)  # sun
+print(Days.Sun.value) # 0
+```
+`@unique`装饰器保证没有重复值。
+
+**使用元类**<br>
+**type()**<br>
+type()函数可以查看一个类型或变量的类型，Hello是一个class，它的类型就是type，而h是一个实例，它的类型就是class Hello。<br>
+type()函数还可以创建一个类，依次传入3个参数
+
+ * class的名称
+ * 继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法
+ * class的方法名称与函数绑定<br>
+          
+ ```python
+    def fn(self,name):
+    print(name)
+
+    Hello = type('Hello', (object,) , dict(hello=fn))
+
+    Hello().hello('shi')
+ ```
+ **metaclass**<br>
+    [元类](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/0014319106919344c4ef8b1e04c48778bb45796e0335839000)
+    
+ 
+ 
