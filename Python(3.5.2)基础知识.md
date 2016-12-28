@@ -24,7 +24,8 @@
     * [装饰器](#装饰器)
     * [偏函数](#偏函数)
  * [面向对象编程](#面向对象编程)
-  
+ * [面向对象高级编程](#面向对象高级编程)
+ * [错误,调试和测试](#错误,调试和测试)
   
 缩进和注释
 ----------
@@ -1270,5 +1271,73 @@ type()函数还可以创建一个类，依次传入3个参数
  **metaclass**<br>
     [元类](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/0014319106919344c4ef8b1e04c48778bb45796e0335839000)
     
+ 错误,调试和测试
+ ---------------------
  
+ **错误处理**<br>
+ ```python
+ try:
+    print('try...')
+    r = 10 / 2
+    print('result:', r)
+except TypeError as e:
+    print('TypeError:', e)
+except ZeroDivisionError as e:
+    print('ZeroDivisionError:', e)
+else:
+    print('no error!')
+finally:
+    print('finally...')
+print('END')
+ ```
+ Python的错误其实也是class，所有的错误类型都继承自BaseException，所以在使用except时需要注意的是，它不但捕获该类型的错误，还把其子类也“一网打尽”<br>
+ ```python
+ try:
+    foo()
+except ValueError as e:
+    print('ValueError')
+except UnicodeError as e:
+    print('UnicodeError')
+ ```
+ 第二个`except`永远也捕获不到`UnicodeError`，因为`UnicodeError`是`ValueError`的子类，如果有，也被第一个`except`给捕获了。<br>
+ Python内置的logging模块可以非常容易地记录错误信息
+ ```python
  
+
+# err_logging.py
+
+import logging
+
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar('0')
+    except Exception as e:
+        logging.exception(e)
+
+main()
+print('END')
+ ```
+ 
+  **抛出错误**<br>
+  
+```python
+def foo(s):
+    n = int(s)
+    if n==0:
+        raise ValueError('invalid value: %s' % s)
+    return 10 / n
+
+def bar():
+    try:
+        foo('0')
+    except ValueError as e:
+        print('ValueError!')
+        raise
+bar()
+```
