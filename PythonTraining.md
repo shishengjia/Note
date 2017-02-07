@@ -10,6 +10,8 @@
 * [找到多个字典中的公共建](#找到多个字典中的公共建)
 * [有序的字典](#有序的字典)
 * [历史记录功能](#历史记录功能)
+* [实现可迭代对象和迭代器对象来优化数据的加载](#实现可迭代对象和迭代器对象来优化数据的加载)
+* [使用生成器函数实现可迭代对象](#使用生成器函数实现可迭代对象)
 
 
 在列表字典集合中根据条件筛选数据
@@ -204,4 +206,97 @@ while True:
     elif line == 'history':  #  用户输入history，则打印记录
         print list(history)
     pickle.dump(history, open('history', 'w'))  #  异常退出也保存历史记录
+```
+
+实现可迭代对象和迭代器对象来优化数据的加载
+--------------------------------
+```python
+# -*- encoding: utf-8 -*-
+from collections import Iterable, Iterator
+import requests
+_author_ = 'shishengjia'
+_date_ = '30/01/2017 16:17'
+
+"""
+采用这种方法，天气的信息将会逐一返回，而不是获取所有数据后再一起返回，提高了效率
+"""
+
+
+class WeatherIterator(Iterator):
+    """
+    天气迭代器
+    """
+    def __init__(self, cities):
+        self.cities = cities
+        self.index = 0
+
+    def get_weather(self, city):
+        """
+        获取城市天气
+        :param city:
+        """
+        r = requests.get(u'http://wthrcdn.etouch.cn/weather_mini?city=' + city)
+        data = r.json()['data']['forecast'][0]
+        return '%s: %s , %s' % (city, data['low'], data['high'])
+
+    def next(self):
+        """
+        重写next方法，返回一个城市的天气信息
+        """
+        if self.index == len(self.cities):
+            raise StopIteration
+        city = self.cities[self.index]
+        self.index += 1
+        return self.get_weather(city)
+
+
+class WeatherIterable(Iterable):
+    def __init__(self, cities):
+        self.cities = cities
+    def __iter__(self):
+        """
+        重写__iter__方法，返回一个城市天气的迭代器
+        """
+        return WeatherIterator(cities)
+
+
+cities = [u'北京', u'武汉', u'上海', u'宁波']
+# for循环中，将会调用WeatherIterable的__iter__方法构造迭代器，再调用迭代器的next方法返回值传给x
+for x in WeatherIterable(cities):
+    print x
+
+```
+
+使用生成器函数实现可迭代对象
+-----------------------------
+```python
+# 实现一个可迭代对象的类，迭代出给定范围内所有素数
+
+class PrimeNumber:
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+    def is_prime_number(self, k):
+        """
+        判断是否是素数
+        """
+        if k < 2:
+            return False
+        else:
+            for i in xrange(2, k):
+                if k % i == 0:
+                    return False
+            return True
+
+    def __iter__(self):
+        """
+        重写__iter__方法，使其为生成器
+        """
+        for i in xrange(self.start, self.end + 1):
+            if self.is_prime_number(i):
+                yield i
+
+for x in PrimeNumber(1, 100):
+    print x
 ```
