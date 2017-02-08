@@ -14,6 +14,7 @@
 * [使用生成器函数实现可迭代对象](#使用生成器函数实现可迭代对象)
 * [进行反向迭代及实现反向迭代](#进行反向迭代及实现反向迭代)
 * [对迭代器作切片操作](#对迭代器作切片操作)
+* [同时迭代多个可迭代对象](#同时迭代多个可迭代对象)
 
 
 在列表字典集合中根据条件筛选数据
@@ -302,6 +303,7 @@ class PrimeNumber:
 for x in PrimeNumber(1, 100):
     print x
 ```
+
 进行反向迭代及实现反向迭代
 ------------------------
 **1.进行反向迭代**
@@ -353,8 +355,8 @@ for x in reversed(FloatRange(1.0, 4.0, 0.2)):
  ```
  
  
- 对迭代器作切片操作
- --------------------
+对迭代器作切片操作
+--------------------
  例子，取出文本文件中指定行数的内容
  ```python
  # 使用readlines方法噶能够实现该要求，但是缺点也很明显，他会一次性读取文件的所有内容，当文件很大的时候是不可取的
@@ -374,4 +376,33 @@ print '-----------------'
 f = open('test.txt')  # 需要注意的是在经过切片后，f对象是有损耗的，即上面前8行的内容将会消失，再次操作需要重新申请一个f对象
 for line in f:
     print line
+ ```
+ 
+同时迭代多个可迭代对象
+------------------------
+ **1.并行迭代**
+ ```python
+ # 统计所有学生三门课的成绩综合
+ # 每一次迭代zip函数返回一个元组,如果zip中每个可迭代对象长度不同，取最小长度为标准，多余的内容舍去
+ Math = [randint(60, 100) for _ in xrange(6)]
+Chinese = [randint(60, 100) for _ in xrange(6)]
+Music = [randint(60, 100) for _ in xrange(6)]
+total = []
+for math,chinese,music in zip(Math, Chinese, Music):  #对元组进行拆包，依次对应三个成绩
+    total.append(math + chinese + music)
+print total
+ ```
+ 
+ **2.串行**
+ ```python
+ # 统计三个班分数不及格的学生人数
+ # chain函数依次将可迭代对象串联起来
+score_1 = [randint(0,100) for _ in xrange(49)]
+score_2 = [randint(0,100) for _ in xrange(43)]
+score_3 = [randint(0,100) for _ in xrange(35)]
+count = 0
+for x in chain(score_1, score_2, score_3):
+    if x < 60:
+        count += 1
+print 'the number of unpassed student:%s' % count
  ```
