@@ -12,6 +12,8 @@
 * [历史记录功能](#历史记录功能)
 * [实现可迭代对象和迭代器对象来优化数据的加载](#实现可迭代对象和迭代器对象来优化数据的加载)
 * [使用生成器函数实现可迭代对象](#使用生成器函数实现可迭代对象)
+* [进行反向迭代及实现反向迭代](#进行反向迭代及实现反向迭代)
+* [对迭代器作切片操作](#对迭代器作切片操作)
 
 
 在列表字典集合中根据条件筛选数据
@@ -300,3 +302,76 @@ class PrimeNumber:
 for x in PrimeNumber(1, 100):
     print x
 ```
+进行反向迭代及实现反向迭代
+------------------------
+**1.进行反向迭代**
+```python
+# 这种方法虽然将列表反向迭代了，但缺点是是改变了原始列表
+l = [1,2,3,4,5]
+l.reverse()
+```
+
+```python
+# 使用切片操作，缺点是会生成一个等大的列表，消耗空间
+l = [1,2,3,4,5]
+l[::-1]
+```
+
+```python
+# 使用reversed()函数，生成一个反向迭代器，与iter()函数生成的迭代器刚好相反
+l = [1,2,3,4,5]
+for x in reversed(l):
+    print x
+```
+
+**2.实现反向迭代**
+ 实际上，`reversed()`函数调用了对象的`__reversed__`，而`iter()`函数调用了对象的`__iter__`，所以，可以自定义一个能够正向迭代和反向迭代的类
+ ```python
+class FloatRange:
+    def __init__(self, start, end, step=0.1):  # 间隔默认为0.1
+        self.start = start
+        self.end = end
+        self.step = step
+
+    def __iter__(self):  # 正向迭代
+        x = self.start
+        while x <= self.end:  # 使用生成器完成迭代的功能
+            yield x
+            x += self.step
+
+    def __reversed__(self):  # 反向迭代
+        x = self.end
+        while x >= self.start:
+            yield x
+            x -= self.step
+
+for x in FloatRange(1.0, 4.0, 0.2):  # __iter__函数会自动调用，不用显示调用该函数
+    print x
+
+for x in reversed(FloatRange(1.0, 4.0, 0.2)):
+    print x
+ ```
+ 
+ 
+ 对迭代器作切片操作
+ --------------------
+ 例子，取出文本文件中指定行数的内容
+ ```python
+ # 使用readlines方法噶能够实现该要求，但是缺点也很明显，他会一次性读取文件的所有内容，当文件很大的时候是不可取的
+ f = open('test.txt')
+line = f.readlines()
+print line[0:3]
+# 需要注意的是当执行完上述操作后，文件的指针已经移动，下次操作时需要将指针置为文件起始位置
+ f.seek(0)
+ ```
+ 
+ ```python
+ # 使用islice
+f = open('test.txt')
+for line in islice(f, 4, 8): # 需要读到末尾的话就讲8改为None
+    print line
+print '-----------------'
+f = open('test.txt')  # 需要注意的是在经过切片后，f对象是有损耗的，即上面前8行的内容将会消失，再次操作需要重新申请一个f对象
+for line in f:
+    print line
+ ```
