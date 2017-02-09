@@ -15,6 +15,7 @@
 * [进行反向迭代及实现反向迭代](#进行反向迭代及实现反向迭代)
 * [对迭代器作切片操作](#对迭代器作切片操作)
 * [同时迭代多个可迭代对象](#同时迭代多个可迭代对象)
+* [拆分含有多个分隔符的字符串](#拆分含有多个分隔符的字符串)
 
 
 在列表字典集合中根据条件筛选数据
@@ -405,4 +406,30 @@ for x in chain(score_1, score_2, score_3):
     if x < 60:
         count += 1
 print 'the number of unpassed student:%s' % count
+ ```
+ 
+拆分含有多个分隔符的字符串
+-------------------------
+ 在只有一个分隔符的时候，`split`函数的效率是最高的
+ **1.最简单的方式就是使用正则表达式**
+ ```python
+ import re
+ 
+ s = 'abc,de/fg\thi;jk..lmn'
+ print re.split('[,/\t.;]+', s)
+ ```
+ **2.用循环来依次分割（效率低，主要看下思路）**
+ ```python
+ def mySplit(s, ds):
+    res = [s]
+    for d in ds:  # 依次迭代所有分隔符
+        # 这里map函数的返回值将是多维列表
+        # 所以使用t来拓展每一次的处理结果
+        t = []
+        map(lambda x:t.extend(x.split(d)), res)
+        res = t
+    return [x for x in res if x]  # 防止字符串中有两个相同分隔符导致结果中有空字符的情况
+
+s = 'abc,de/fg\thi;jk..lmn'
+print mySplit(s, ',/\t.;')
  ```
