@@ -16,6 +16,7 @@
 * [对迭代器作切片操作](#对迭代器作切片操作)
 * [同时迭代多个可迭代对象](#同时迭代多个可迭代对象)
 * [拆分含有多个分隔符的字符串](#拆分含有多个分隔符的字符串)
+* [判断字符串a是否以b开头或结尾](#判断字符串a是否以b开头或结尾)
 
 
 在列表字典集合中根据条件筛选数据
@@ -433,3 +434,18 @@ print 'the number of unpassed student:%s' % count
 s = 'abc,de/fg\thi;jk..lmn'
 print mySplit(s, ',/\t.;')
  ```
+ 
+判断字符串a是否以b开头或结尾
+---------------------------
+**使用`startswith()`和`endswith()`即可完成，这里以修改Linux下指定文件的权限为例**
+```python
+import os,stat
+
+#  首先找到当前目录下所有以.cpp结尾的文件
+file_cpp = [files for files in os.listdir('.') if files.endswith('.cpp')]
+#  对每一个文件修改权限，添加用户可执行权限，os.stat(x).st_mode获得与权限相关的一个值，
+#  再与用户可执行的掩码进行或运算，获得用户可执行权限，最后使用chmod进行权限的修改
+#  S_IXUSR X代表可执行，USR代表用户
+map(lambda x:os.chmod(x, os.stat(x).st_mode | stat.S_IXUSR), file_cpp )
+
+```
