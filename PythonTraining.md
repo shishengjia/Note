@@ -18,6 +18,9 @@
 * [拆分含有多个分隔符的字符串](#拆分含有多个分隔符的字符串)
 * [判断字符串a是否以b开头或结尾](#判断字符串a是否以b开头或结尾)
 * [调整文本中文本格式](#调整文本中文本格式)
+* [连接字符串](#连接字符串)
+* [对字符串左右居中对齐](#对字符串左右居中对齐)
+* [去掉字符串不需要的字符](#去掉字符串不需要的字符)
 
 在列表字典集合中根据条件筛选数据
 ---------------------------------
@@ -481,4 +484,98 @@ for x in s:
 ```python
 s = ['<123>', '<345>', '<1>', '<908>']
 ''.join((str(x) for x in s))
+```
+
+对字符串左右居中对齐
+-------------------
+**1.使用`str.ljust()`,`str.rjust()`,`str.center()`**<br>
+```python
+d = {
+   'HearthStone' : 128,
+   'OverWatch' : 198,
+   'WOW' : 30
+ }
+ # 取的最长的键的长度
+ width_max = max(map(len, d.keys()))
+ 
+ for x in d:
+   print x.ljust(width_max),':',d[x]
+```
+
+**2.使用`format`**<br>
+`<`,`^`,`>`分别表示左，中，右对齐
+```python
+d = {
+   'HearthStone' : 128,
+   'OverWatch' : 198,
+   'WOW' : 30
+ }
+ 
+ # 取的最长的键的长度
+ width_max = max(map(len, d.keys()))
+ 
+ for x in d:
+   print format(x, '<%s' % width_max),':',d[x]
+
+```
+
+
+去掉字符串不需要的字符
+---------------------
+**1.`str.strip()`,`str.lstrip()`,`str.rstrip()`,参数为需要去掉字符(可以多个)**<br>
+缺点是不能去掉中间的字符
+```python
+s = '----abc+++abc-----'
+
+s.strip('-')
+# 'abc+++abc'
+
+s.lstrip('-')
+# 'abc+++abc-----'
+
+s.rstrip('-')
+# '----abc+++abc'
+```
+
+**2.切片操作**<br>
+这种方法比较局限，需要实现知道所去除字符的位置
+```python
+s2 = 'abc+def'
+
+s2[:3] + s2[4:]
+# 'abcdef'
+```
+
+**3.str.replace**<br>
+缺点是一次只能去掉一种字符
+```python
+x = '--a---a---'
+
+x.replace('-', '')
+# 'aa'
+```
+
+**4.使用正则表达式**
+```python
+import re
+
+s = '--+++abc+++---abc'
+
+re.sub('[+-]', '', s4)
+# 'abcabc'
+```
+
+**5.str.translate**
+```python
+import string
+
+s = 'abc---xyz'
+# 可以用来作字符射，传入映射表，string.maketrans('abcxyz', 'xyzabc')
+s.translate(string.maketrans('abcxyz', 'xyzabc'))
+# 'xyz---abc'
+
+# 也可以用来删除字符,映射表为None，传入删除字符集
+s = '---abc+++abc'
+s.translate(None, '-+' )
+# 'abcabc'
 ```
