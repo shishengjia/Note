@@ -21,7 +21,7 @@
 * [连接字符串](#连接字符串)
 * [对字符串左右居中对齐](#对字符串左右居中对齐)
 * [去掉字符串不需要的字符](#去掉字符串不需要的字符)
-
+* [读写文本文件](#读写文本文件)
 在列表字典集合中根据条件筛选数据
 ---------------------------------
 
@@ -579,3 +579,35 @@ s = '---abc+++abc'
 s.translate(None, '-+' )
 # 'abcabc'
 ```
+
+读写文本文件
+---------------
+在Python2中定义字节字符串,'abc',但是在Python3中，前面要加个b，b'abc'<br>
+在Python2中定义unicode字符串,u'你好',但是在Python3中，前面不需要加u，'你好'<br>
+**1.Python2下的文本读写**<br>
+写入文件前对unicode编码，读入文件后对二进制字符解码
+```python
+f = open('test.txt', 'w')
+s = u'你好'
+f.write(s.encode('gbk'))  # 对unicode编码
+f.close()
+
+f = open('test.txt', 'r')
+t = f.read()
+print t.decode('gbk')  # 以相同格式解码
+```
+
+**2.Python3下的文本读写**<br>
+open函数指定`t`的文本模式(默认为t,可以省略)，endcoding指定编码格式
+```python
+f = open('test.txt', 'wt', encoding='utf8')
+f.write('你好')
+f.close()
+
+f = open('test.txt', 'rt', encoding='utf8')
+s = f.read()
+print(s)
+```
+
+
+
