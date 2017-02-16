@@ -22,6 +22,10 @@
 * [对字符串左右居中对齐](#对字符串左右居中对齐)
 * [去掉字符串不需要的字符](#去掉字符串不需要的字符)
 * [读写文本文件](#读写文本文件)
+* [设置文件的缓冲区大小](#设置文件的缓冲区大小)
+* [访问文件状态](#访问文件状态)
+* [使用临时文件](#使用临时文件)
+
 在列表字典集合中根据条件筛选数据
 ---------------------------------
 
@@ -609,5 +613,79 @@ s = f.read()
 print(s)
 ```
 
+设置文件的缓冲区大小
+--------------------
+文件的默认缓冲区大小为`4096`个字节(跟设备有关)，当写入的数据达到`4096`个字节，进行一次写操作，可以使用`tail -f filename`来监听文件的写入。<br>
+文件缓冲可分为:
+ * 全缓冲,`open`函数的`buffering`值为大于`1`的整数n，n即为缓冲区的大小
+ * 行缓冲,`open`函数的`buffering`值为`1`,每遇到一个换行符'\n',进行一次写入
+ * 无缓冲,`open`函数的`buffering`值为`0`,每一次输入都会被直接写入
+ 
+```python
+f = open('demo.txt', 'w', buffering = 2048)
+f = open('demo.txt', 'w', buffering = 1)
+f = open('demo.txt', 'w', buffering = 0)
+```
 
+访问文件状态
+------------
+**1.系统调用**<br>
+os模块下的三个系统调用，`stat`,`fstat`,`lstat`。<br>
+`fstat`需要传入一个打开的文件描述符，其余与`stat`类似。<br>
+使用`lstat`不会跟随符号链接,获取的是符号链接文件的状态,其余则与`stat`类似
+```python
+import os
+import stat
+import time
 
+state = os.stat('data.log')
+# posix.stat_result(st_mode=33188, st_ino=311306, st_dev=64769L, st_nlink=1, st_uid=0, st_gid=0, st_size=22, st_atime=1487254706,
+# st_mtime=1487254706, st_ctime=1487254706)
+
+stat.S_ISDIR(state.st_mode)
+# 不是文件夹 False
+
+stat.S_ISREG(state.st_mode)
+# 是普通文件 True
+
+state.st_mode & stat.S_IWUSR # 跟用户写权限的掩码相与，值大于0即为拥有该权限，判断其他权限亦然
+
+time.localtime(state.st_atime) # 获得最后访问时间
+# time.struct_time(tm_year=2017, tm_mon=2, tm_mday=16, tm_hour=22, tm_min=18, tm_sec=26, tm_wday=3, tm_yday=47, tm_isdst=0)
+
+state.st_size # 文件大小
+```
+
+**2.快捷函数**<br>
+`os.path`下的一些函数,需要注意的是该方法无法获得用户的权限
+```python
+import os
+
+os.path.isfile('data.log') # 判断是否是文件
+
+time.localtime(os.path.getatime('data.log'))
+
+os.path.getsize('data.log')
+
+```
+
+使用临时文件
+--------------
+临时文件不用命名，收集的数据将被临时存储到外部存储，且关闭后会自动删除<br>
+**1.TemporaryFile**<br>
+默认参数，`TemporaryFile(mode='w+b', bufsize=-1, suffix='', prefix='tmp', dir=None)`，`bufsize=-1` 表示采用默认缓存<br>
+```python
+f = TemporaryFile()
+f.write('a' * 10000)
+f.seek(0) # 文件指针指向文件头部
+f.read(100) # 根据需要向内存中读入一部分内容
+```
+
+**2.NamedTemporaryFile**<br>
+`NamedTemporaryFile(mode='w+b', bufsize=-1, suffix='', prefix='tmp', dir=None, delete=True)`,`delete`参数默认为`True`，即关闭后将自动删除文件，设置为`False`后将不被删除，其余则与`TemporaryFile`相同<br>
+```python
+f = NamedTemporaryFile()
+print f.name # 通过f.name可以知道临时文件的目录及名字
+# '/tmp/tmpHTdMVl'
+
+```
