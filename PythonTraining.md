@@ -25,6 +25,10 @@
 * [设置文件的缓冲区大小](#设置文件的缓冲区大小)
 * [访问文件状态](#访问文件状态)
 * [使用临时文件](#使用临时文件)
+* [读写csv数据](#读写csv数据)
+* [读写json数据](#读写json数据)
+* [处理excel文件](#处理excel文件)
+
 
 在列表字典集合中根据条件筛选数据
 ---------------------------------
@@ -688,4 +692,85 @@ f = NamedTemporaryFile()
 print f.name # 通过f.name可以知道临时文件的目录及名字
 # '/tmp/tmpHTdMVl'
 
+```
+
+读写csv数据
+--------------
+```python
+from urllib import urlretrieve
+
+# 下载数据后存储到pingan_origin.csv文件中
+urlretrieve('http://table.finance.yahoo.com/table.csv?s=000001.sz', 'pingan_origin.csv')
+```
+写一个python脚本处理数据，获取2017年的相关数据
+```python
+import csv
+
+with open('pingan_origin.csv', 'rb') as rf:
+    reader = csv.reader(rf)
+    with open('pingan_2017.csv', 'wb') as wf:
+        writer = csv.writer(wf)
+        header = reader.next()  
+        writer.writerow(header)  # 先写入头部标识数据，Date,Open,High,Low,Close,Volume,Adj Close
+        for row in reader:  #  从剩下的实际数据中筛选出2017年的数据并写入文件
+            if row[0] >= '2017-01-01' and row[0] <= '2017-12-31':
+                writer.writerow(row)
+```
+
+读写json数据
+------------
+```python
+import json
+
+l = [1, 2, {'name':'shishengjia', 'age':15}]  
+json.dumps(l) # python对象转化为jason字符串
+# '[1, 2, {"age": 15, "name": "shishengjia"}]'
+
+d = {'a':None, 'c':'hello', 'b':3}
+# separators参数指定分隔符逗号和分号，周围的空格省去，sort_keys参数设为True指定结果按键值大小排列
+json.dumps(d, separators=[',', ':'], sort_keys=True)
+# '{"a":null,"b":3,"c":"hello"}'
+
+d_2 = '[1, 2, {"age": 15, "name": "shishengjia"}]'
+json.loads(d)  # jason字符串转化为python对象
+# [1, 2, {u'age': 15, u'name': u'shishengjia'}]
+
+l = {'b':1, 'a':2}
+# 使用dump函数将python对象转化为json字符串后写入文件，同理load函数则为从文件中读取相应python对象
+with open('demo.json', 'wb') as f:
+    json.dump(l, f)
+    
+with open('demo.json', 'rb') as f:
+    s = json.load(f)
+    print s # {u'a': 2, u'b': 1}
+
+```
+
+处理excel文件
+---------------
+```python
+#coding:utf8
+import xlrd, xlwt
+
+rbook = xlrd.open_workbook('test.xlsx')
+rsheet = rbook.sheet_by_index(0)  # 根据索引找到第一张工作表
+
+nc = rsheet.ncols  # 工作表列数
+rsheet.put_cell(0, nc, xlrd.XL_CELL_TEXT, u'Total', None) # 在第nc列添加'Total'表头
+
+for row in xrange(1, rsheet.nrows):  # 从第二行开始遍历
+    t = sum(rsheet.row_values(row, 1))  # 每一行第二列后面的数据相加得到总分
+    rsheet.put_cell(row, nc, xlrd.XL_CELL_NUMBER, t, None) # 在第nc列添加总分数据
+
+
+wbook = xlwt.Workbook()  
+wsheet = wbook.add_sheet(rsheet.name)  # 新的文件里添加一张工作表
+style = xlwt.easyxf('align: vertical center, horizontal center') # 设置样式，垂直居中，水平居中
+
+# 将所有数据写入工作表
+for r in xrange(rsheet.nrows):
+    for c in xrange(rsheet.ncols):
+        wsheet.write(r, c, rsheet.cell_value(r, c), style)
+
+wbook.save('output.xls')  # 保存这个文件
 ```
