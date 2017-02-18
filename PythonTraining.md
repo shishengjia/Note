@@ -28,6 +28,10 @@
 * [读写csv数据](#读写csv数据)
 * [读写json数据](#读写json数据)
 * [处理excel文件](#处理excel文件)
+* [如何派生内置不可变类型并修改实例化行为](#如何派生内置不可变类型并修改实例化行为)
+* [为创建大量实例节省内存](#为创建大量实例节省内存)
+* [让对象支持上下文管理](#让对象支持上下文管理)
+
 
 
 在列表字典集合中根据条件筛选数据
@@ -773,4 +777,120 @@ for r in xrange(rsheet.nrows):
         wsheet.write(r, c, rsheet.cell_value(r, c), style)
 
 wbook.save('output.xls')  # 保存这个文件
+```
+
+如何派生内置不可变类型并修改实例化行为
+-----------------------------------
+`__new__`方法是先于`__init__`方法执行的，是`__new__`方法真正创建了实例，并且返回传给了`__init__`中的self<br>
+1.`__init__` 通常用于初始化一个新实例，控制这个初始化的过程，比如添加一些属性， 做一些额外的操作，发生在类实例被创建完以后。它是实例级别的方法。<br>
+2.`__new__` 通常用于控制生成一个新实例的过程。它是类级别的方法。<br>
+所以，`__new__`方法主要是继承一些不可变的class时(比如`int`, `str`, `tuple`)， 提供一个自定义这些类的实例化过程的途径，正如下面这个例子，在实例化自定义tuple的时候，过滤相关元素
+```python
+class IntTuple(tuple):
+    
+    def log(func):
+        @functools.wraps(func) #把原始函数的__name__等属性复制到wrapper()函数中
+        def wrapper(*args, **kw):
+            print('call %s():' % func.__name__)
+            return func(*args, **kw)
+        return wrapper
+    
+    @log
+    def __new__(cls, iterable):
+        g = (x for x in iterable if isinstance(x, int) and x > 0)
+        return super(IntTuple, cls).__new__(cls, g)
+    
+    @log
+    def __init__(self, iterable):
+        super(IntTuple, self).__init__()
+
+t = IntTuple([1,2,-1,'123',34])
+print(t)
+
+'''
+call __new__():
+call __init__():
+(1, 2, 34)
+'''
+```
+
+为创建大量实例节省内存
+-------------------------
+从下面的例子中可以看出，类`play_1`相比`play_2`多出了两个属性，其中的`__dict__`是用来保存动态绑定的属性，它占据了68个字节，这部分占据的内存是远大于实例的数据的，所以当有大量的实例被构建出来时，这将是一个巨大的内存开销，因此在`play_2`类中，使用了`__slots__`来限定类属性，使其不能动态绑定属性，这样`__dict__`也就不存在了，节约了大量内存空间。
+```python
+class play_1():
+    def __init__(self, id, name, age):
+        self.id = id
+        self.name = name
+        self.age = age
+
+class play_2():
+    __slots__ = ['id', 'name', 'age']
+    def __init__(self, id, name, age):
+        self.id = id
+        self.name = name
+        self.age = age
+
+p1 = play_1(1, 'shi', 23)
+s1 = set(dir(p1))  # 实例p1属性的集合
+p2 = play_2(2, 'wang', 23)
+s2 = set(dir(p2))  # 实例p2属性的集合
+print(s1-s2)  # p1,p2属性差集  {'__dict__', '__weakref__'}
+print(p1.__dict__) # {'id': 1, 'name': 'shi', 'age': 23}
+print(sys.getsizeof(p1.__dict__))  # 68
+```
+
+让对象支持上下文管理
+-------------------
+实现上下文管理协议，需要定义实例的`__enter__`和`__exit__`方法，分别在with开始和结束时被调用
+```python
+from telnetlib import Telnet
+from sys import stdin, stdout
+from collections import deque
+
+class TelnetClient(object):
+    def __init__(self, address, port=23):
+        self.address = address
+        self.port = port
+        self.tn = None
+
+    def start(self):
+        # user
+        t = self.tn.read_until('Login: ')
+        stdout.write(t)
+        user = stdin.readline()
+        self.tn.write(user)
+
+        # password
+        t = self.tn.read_until('Password: ')
+        if t.startswith(user[:-1]):
+            t = t[len(user) + 1:]
+        stdout.write(t)
+        self.tn.write(stdin.readline())
+
+        t = self.tn.read_until('$ ')
+        stdout.write(t)
+        while True:
+            uinput = stdin.readline()
+            if not uinput:
+                break
+            self.history.append(uinput)
+            self.tn.write(uinput)
+            t = self.tn.read_until('$ ')
+            stdout.write(t[len(uinput) + 1:])
+
+    def __enter__(self):
+        self.tn = Telnet(self.address, self.port)
+        self.history = deque()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.tn.close()
+        self.tn = None
+        with open(self.address + '_history.txt', 'w') as f:
+            f.writelines(self.history)
+
+with TelnetClient('127.0.0.1') as client:
+    client.start()
+
 ```
