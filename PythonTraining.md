@@ -32,7 +32,8 @@
 * [为创建大量实例节省内存](#为创建大量实例节省内存)
 * [让对象支持上下文管理](#让对象支持上下文管理)
 * [让类支持比较操作](#让类支持比较操作)
-
+* [使用描述符对实例属性进行类型检查](#使用描述符对实例属性进行类型检查)
+* [利用弱引用管理环状数据结构的内存](#利用弱引用管理环状数据结构的内存)
 
 在列表字典集合中根据条件筛选数据
 ---------------------------------
@@ -979,4 +980,80 @@ class Circle(Shape):
         if not isinstance(radius, (int, float)):
             raise ValueError('radius must be a number')
         self.__radius = radius
+```
+
+使用描述符对实例属性进行类型检查
+--------------------------------
+```python
+class Attr(object):
+    def __init__(self, name, type_):
+        self.name = name
+        self.type_ = type_
+
+    def __get__(self, instance, cls):
+        return instance.__dict__[self.name]
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self.type_):
+            raise TypeError('expected an %s' % self.type_)
+        instance.__dict__[self.name] = value
+
+    def __delete__(self, instance):
+        del instance.__dict__[self.name]
+
+
+class Person(object):
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    name = Attr('name', str)
+    age = Attr('age', int)
+```
+
+利用弱引用管理环状数据结构的内存
+------------------------------
+在某些环状数据结构（树，图）中，对象之间存在循环引用，比如树的父节点引用子节点，子节点同时引用父节点，此时同时`del`掉引用父子节点，两个对象不能被立即回收,因为两者相互引用，两者的引用计数还是`1`<br>
+因此，使用标准库中的`weakref`，可以创建一种能访问对象但不增加引用计数的对象。
+```python
+import sys,wreakref
+
+class A(object):
+    def __del__(self):
+    print('in A.__del__')
+    
+ a = A()
+ print(sys.getrefcount(a) - 1) # 引用计数为 1
+ # 创建一个弱引用
+ a_weak = weakref.ref(a) 
+ 
+ print(sys.getrefcount(a) - 1) # 引用计数还是为 1
+ # 访问对象，注意加上`()`
+ print(a_weak() is a) # True
+ 
+```
+例子
+```python
+import weakref
+
+class Data(object):
+    def __init__(self, value, owner):
+        # 这里的owner是对Node的一个弱引用，这样就不增加Node的引用计数了
+        self.owner = weakref.ref(owner)
+        self.value = value
+
+    def __str__(self):
+        return "%s's data, value is %s" % (self.owner(), self.value)
+
+    def __del__(self):
+        print 'in Data.__del__'
+
+
+class Node(object):
+    def __init__(self, value):
+        self.data = Data(value, self)
+
+    def __del__(self):
+        print 'in Node.__del__'
 ```
