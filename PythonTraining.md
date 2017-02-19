@@ -31,7 +31,7 @@
 * [如何派生内置不可变类型并修改实例化行为](#如何派生内置不可变类型并修改实例化行为)
 * [为创建大量实例节省内存](#为创建大量实例节省内存)
 * [让对象支持上下文管理](#让对象支持上下文管理)
-
+* [让类支持比较操作](#让类支持比较操作)
 
 
 在列表字典集合中根据条件筛选数据
@@ -893,4 +893,90 @@ class TelnetClient(object):
 with TelnetClient('127.0.0.1') as client:
     client.start()
 
+```
+
+
+让类支持比较操作
+------------------
+让类支持比较操作，只需要在类中重载相关方法即可，这里使用`functools`下的`total_ordering`，就可以只重载` __eq__ `和` __lt__ `,剩下的运算方法系统会自动根据逻辑运算进行判断。另外从`shape_1.__eq__(shape_2)`,可以看出要想实现双向比较，如果有不同的形状类，需要都去重载相关方法，这时可以提取出一个公共的形状类，实现类的运算比较，其他具体的形状类只要继承它就可以获得相关方法了。
+```python
+from functools import total_ordering
+from abc import ABCMeta, abstractmethod
+
+_author_ = 'shishengjia'
+_date_ = '30/01/2017 16:17'
+
+
+@total_ordering
+class Shape(object):
+    """
+    形状类
+    """
+    @abstractmethod
+    def area(self):
+        pass
+
+    def __eq__(self, obj):
+        if not isinstance(obj, Shape):
+            raise TypeError('obj is not a Shape')
+        return self.area() == obj.area()
+
+    def __lt__(self, obj):
+        if not isinstance(obj, Shape):
+            raise TypeError('obj is not a Shape')
+        return self.area() < obj.area()
+
+
+class Rectangle(Shape):
+    """
+    矩形类
+    """
+    def __init__(self, length, width):
+        self.__length = length
+        self.__width = width
+
+    def area(self):
+        return self.__width * self.__length
+
+    @property
+    def length(self):
+        return self.__length
+
+    @length.setter
+    def length(self, length):
+        if not isinstance(length, (int, float)):
+            raise ValueError('length must be a number')
+        self.__length = length
+
+    @property
+    def width(self):
+        return self.__width
+
+    @width.setter
+    def width(self, width):
+        if not isinstance(width, (int, float)):
+            raise ValueError('width must be a number')
+        self.__width = width
+
+
+
+class Circle(Shape):
+    """
+    圆类
+    """
+    def __init__(self, radius):
+        self.__radius = radius
+
+    def area(self):
+        return 3.14 * self.__radius * self.__radius
+
+    @property
+    def radius(self):
+        return self.__radius
+
+    @radius.setter
+    def radius(self, radius):
+        if not isinstance(radius, (int, float)):
+            raise ValueError('radius must be a number')
+        self.__radius = radius
 ```
