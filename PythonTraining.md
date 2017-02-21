@@ -34,6 +34,7 @@
 * [让类支持比较操作](#让类支持比较操作)
 * [使用描述符对实例属性进行类型检查](#使用描述符对实例属性进行类型检查)
 * [利用弱引用管理环状数据结构的内存](#利用弱引用管理环状数据结构的内存)
+* [通过实例方法名字的字符串调用方法](#通过实例方法名字的字符串调用方法)
 
 在列表字典集合中根据条件筛选数据
 ---------------------------------
@@ -1056,4 +1057,36 @@ class Node(object):
 
     def __del__(self):
         print 'in Node.__del__'
+```
+
+通过实例方法名字的字符串调用方法
+-----------------------------------
+```python
+class Circle(object):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def get_Area(self):
+        return self.radius * self.radius * 3.14
+
+
+class Rectangle(object):
+    def __init__(self, width, length):
+        self.width = width
+        self.length = length
+
+    def get_area(self):
+        return self.width * self.length
+
+
+def getArea(shape):
+    for name in ['get_Area', 'get_area']:
+        # 在列表里查找自己方法名字的字符串，没有返回None
+        f = getattr(shape, name, None)
+        if f:
+            return f()
+
+shape_1 = Circle(3)
+shape_2 = Rectangle(3, 4)
+print(list(map(getArea, [shape_1, shape_2])))
 ```
