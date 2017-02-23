@@ -1,5 +1,5 @@
 
-#使用的Python版本是3.5.2,内容参考[廖雪峰大神的Python教程](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000)
+#使用的Python版本是3.5.2,内容参考[廖雪峰的Python教程](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000)
 ##目录
  * [缩进和注释](#缩进和注释)
  * [输入输出](#输入输出)
